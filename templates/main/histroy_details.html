@@ -1,0 +1,52 @@
+{% extends 'main/base.html' %}
+
+{% block style %}
+    <style>
+        .file-list {
+            padding:15px 5px;
+        }
+        .file-list li{
+          list-style: none;
+        }
+        .file-list .file-size {
+          font-size:0.8em;
+          color: #666;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="app-ctn">
+        <h1>补丁详情</h1>
+        <div class="app-history-nav"><a href="#">首页</a> -> <a href="{% url 'patch_issued' app.id %}">教育大厅</a> -> <a href="{% url 'histroy' app.id %}">历史补丁</a></div>
+        <div class="alert alert-danger" id="errMsg" style="display:none"></div>
+        <div class="alert alert-success" id="succMsg" style="display:none"></div>
+        <div class="patch-info">
+            <div><span class="title">App版本号：</span><span></span>{{ app_version }}</div>
+            <div><span class="title">补丁版本号：</span><span>{{ datas.patch_version }}</span></div>
+            <div><span class="title">补丁大小：</span><span>{{ datas.size }}KB</span></div>
+            <div><span class="title">下发时间：</span><span>{{ datas.create_time }}</span></div>
+            <div id="patchCount"><span class="title">已下发(成功数/总数)：</span><span id="patchCountNum"></span></div>
+            <div><span class="title">补丁描述：</span><span>{{ datas.description }}</span></div>
+            <div>
+            <span class="title">补丁文件 <a href="">(下载)</a>：</span>
+            <ul class="file-list">
+            <li>解压后总大小：<span class="file-size">()</span></li>
+            </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    <script type="text/javascript">
+        $("#histroy").addClass('active');
+        $('[data-toggle="tooltip"]').tooltip();
+        var fillPadding = function() {
+            $('#fill').height($('#fill').height() + window.innerHeight - ($('.main').offset().top + $('.main').height() + $('.ft').height()))
+        };
+        $(window).resize(fillPadding);
+        fillPadding();
+        $('.ft').show();
+    </script>
+{% endblock %}

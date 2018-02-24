@@ -1,0 +1,75 @@
+<html>
+<head>
+    <title>APP详情 - Tinker Platform - Android 热补丁平台</title>
+    <meta name="description" content="Tinker 平台提供 Android APP 热更新服务，APP 接入 Tinker 平台后，可以随时下发补丁包，实时更新APP">
+    <link rel="stylesheet" href="/static/main/css/bootstrap.min.css"/>
+    <!-- <link rel="stylesheet" href="/Public/css/flat-ui.min.css" /> -->
+    <link rel="stylesheet" href="/static/main/css/main.css"/>
+    <link rel="shortcut icon" href="/static/main/images/favicon.ico" type="image/x-icon"/>
+</head>
+
+<body>
+
+<div class="hd">
+    <div class="wrapper">
+        <a href="/main/" class="logo-tinker"></a>
+        <ul>
+            <li><a href="#" class="">我的帐号</a></li>
+            <li><a href="{% url 'index' %}" class="selected">我的App</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="main">
+
+    <div class="wrapper">
+        <div class="app-list">
+            {% for i in allapp %}
+                <a href="{% url 'patch_issued' i.id %}">
+                <div class="app-icon">
+                    <img src="/static/main/images/app-icon.png">
+                    <span class="mask"></span>
+                </div>
+                <div class="app-list-title">{{ i.appname }}</div>
+                <div class="app-list-detail">
+                    <span>包名：{{ i.packname }}</span>
+{#                    <span>Patch版本：1</span>#}
+                </div>
+                <span class="app-list-btn">管理</span>
+                <div class="clear"></div>
+            </a>
+            {% endfor %}
+            <a href="{% url 'add_app' %}" class="app-new-btn ">
+                <img src="/static/main/images/new-app.png"/><span class="app-list-btn">新增APP</span>
+            </a>
+        </div>
+        <div class="clear"></div>
+    </div>
+    <div class="clear"></div>
+    <div id="fill"></div>
+</div>
+
+<div class="ft">
+    <span class="copyright">AndroidUpdateManege   -cris  © 2017 </span>
+    <!-- <span class="links">
+              <a href="javascript:void(0);">Github开源</a> | <a href="javascript:void(0);">用户协议</a> |<a
+            href="javascript:void(0);">联系我们</a></span>
+    </span> -->
+</div>
+
+<script src="/static/jquery/jquery-1.11.3.min.js"></script>
+<script src="/static/main/js/bootstrap.min.js?v=1.2"></script>
+<script type="text/javascript">
+
+    $('[data-toggle="tooltip"]').tooltip();
+
+    var fillPadding = function () {
+        $('#fill').height($('#fill').height() + window.innerHeight - ($('.main').offset().top + $('.main').height() + $('.ft').height()))
+    }
+    $(window).resize(fillPadding);
+    fillPadding();
+    $('.ft').show();
+</script>
+
+</body>
+</html>

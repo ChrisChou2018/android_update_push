@@ -1,0 +1,57 @@
+{% extends "main/base.html" %}
+
+{% block content %}
+    <div class="app-ctn patch-ctn">
+        <h1>添加版本</h1>
+        <form method="POST" enctype="multipart/form-data" style="width:400px;margin:0 auto;">
+            <div class="form-group">
+                <label for="">App版本号:</label>
+                <input id="app_version" name="app_version" type="text" class="form-control" placeholder="App版本号">
+            </div>
+          <div class="form-group">
+            <button id="add"  class="btn btn-large btn-block btn-primary"> 提 交 </button>
+          </div>
+        </form>
+    </div>
+   
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript">
+    $("#patch_issued").addClass("active");
+    $('[data-toggle="tooltip"]').tooltip();
+
+    var fillPadding = function() {
+        $('#fill').height($('#fill').height() + window.innerHeight - ($('.main').offset().top + $('.main').height() + $('.ft').height()))
+    };
+    $(window).resize(fillPadding);
+    fillPadding();
+    $('.ft').show();
+    //添加app
+    $("#add").click(function(){
+        var app_version=$("#app_version").val();
+        var app_channel=$("#app_channel").val();
+        var senddata={"app_version":app_version, "app_channel":app_channel, "appid":{{ app.id }}};
+        $.ajax({
+            async:false,
+            url:'/main/api/add_app_version.do',
+            type:'POST',
+            data:senddata,
+            success:function (msg) {
+                if (msg.return_code == 'SUCCESS'){
+                    alert(msg.return_msg);
+                    location.href="{% url 'patch_issued' app.id %}";
+                }else {
+                    alert(msg.return_msg)
+                }
+            },
+            error:function (err) {
+                console.log(err);
+                location.reload();
+            }
+        });
+        return false;
+    })
+</script>
+
+{% endblock %}

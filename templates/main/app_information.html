@@ -1,0 +1,106 @@
+{% extends 'main/base.html' %}
+
+{% block style %}
+    <style>
+        .dropdown-menu {
+          width:450px!important;
+          overflow: hidden;
+        }
+        .app-actions {
+            margin: 70px auto 20px auto;
+            width:150px;
+        }
+        .app-delete-btn {
+            width: 150px!important;
+            padding: 15px 0!important;
+            margin:0 10px!important;
+            float: left;
+        }
+
+        .app-delete-panel {
+            clear:both;
+            width: 300px;
+            background: #eaeaea;
+            border-radius: 10px;
+            padding:10px 30px 5px 30px;
+            margin: 10px auto;
+            display: none;
+        }
+
+        .app-delete-panel h4{
+            font-size: 20px;
+            text-align: center;
+        }
+
+        .app-delete-panel p {
+            font-size:14px;
+        }
+
+        .app-delete-panel .btn {
+            width: 115px!important;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="app-ctn">
+        <h1>APP 信息</h1>
+        <form action="{% url 'app_information' app.id %}" class="app-info-form" method="POST">
+            {% if return_msg %}
+            <div class="alert alert-danger">{{return_msg}}</div>
+            {% else %}
+            {% endif %}
+            <input type="text" style="display:none;" value="update" name="method">
+            <div class="form-group">
+                <label>APP 名称:</label>
+                <input type="text" class="form-control" id="appname" name="appname" placeholder="App名" value="{{app.appname}}">
+            </div>
+            <div class="form-group">
+                <label> 包  名:</label>
+                <input type="text" class="form-control" id="packname" name="packname" placeholder="包名" value="{{app.packname}}">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-large btn-block btn-primary"> 修 改 </button>
+            </div>
+        </form>
+        <div class="app-actions">
+            <a href="#deleteModal" class="btn btn-large btn-danger btn-block app-delete-btn" data-toggle="modal">删除此App</a>
+            <div class="clear"></div>
+        </div>
+    </div>
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <div class="modal-title">确定删除此APP？</div>
+        </div>
+        <div class="modal-body">
+            <p>注意：删除将无法恢复</p>
+        </div>
+        <div class="modal-footer">
+            <form method="POST" style="margin:0" action="{% url 'app_information' app.id %}">
+                <input name="appVersion" type="hidden" value=""/>
+                <input type="text" style="display:none;" value="delete" name="method">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">取消</button>
+                <button class="btn btn-danger" type="submit">确定删除</button>
+            </form>
+        </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+    <script type="text/javascript">
+        $("#app_information").addClass('active');
+        $('[data-toggle="tooltip"]').tooltip();
+
+        var fillPadding = function() {
+            $('#fill').height($('#fill').height() + window.innerHeight - ($('.main').offset().top + $('.main').height() + $('.ft').height()))
+        };
+        $(window).resize(fillPadding);
+        fillPadding();
+        $('.ft').show();
+    </script>
+{% endblock %}

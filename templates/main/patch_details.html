@@ -1,0 +1,224 @@
+{% extends 'main/base.html' %}
+
+{% block style %}
+    <style>
+        #graySelect {
+            width:80px;
+        }
+
+        #conditionInput {
+            width:200px;
+            display: inline-block;
+            height:37px;
+        }
+        #conditionRollText {
+            padding-left:75px;
+            font-size: 14px;
+        }
+        .patch-ctn {
+            padding:20px 10px 0 50px;
+            float: left;
+            width:550px;
+        }
+        .patch-ctn h4{
+            text-align: center;
+            padding: 20px 0 30px 0;
+            font-size: 35px;
+        }
+        .patch-form-gray-count {
+            width:100px;
+            height:30px!important;
+        }
+        #patchContent img {
+            margin-left:10px;
+            display: none;
+        }
+        #patchCode {
+            display: none;
+            margin-top:10px;
+        }
+        #patchCode h4{
+            padding:0;
+            text-align: left;
+            font-size: 14px;
+            margin: 10px 0 8px 0;
+            display: inline;
+        }
+        #patchCode pre{
+            clear:both;
+            overflow-x: scroll;
+            margin-top:10px;
+        }
+        #contentHideBtn {
+            display: none;
+        }
+        .download-code {
+            font-size:14px;
+            float: right;
+            margin-right: 10px;
+        }
+
+        #conditionSelect {
+            width: 95px;
+            height: 38px;
+        }
+
+    </style>
+{% endblock %}
+{% block content %}
+
+    <div class="patch-ctn">
+        <h4>补丁详情</h4>
+        <div class="alert alert-danger" id="errMsg" style="display:none"></div>
+        <div class="alert alert-success" id="succMsg" style="display:none"></div>
+        <div class="patch-info">
+            <div><span class="title">App版本号：</span><span>{{ datas.app_version }}</span></div>
+            <div><span class="title">当前补丁版本号：</span><span>{{ datas.patch_version }}</span></div>
+            <div><span class="title">当前补丁大小：</span><span>{{ datas.size }}KB</span></div>
+            <div><span class="title">更新时间：</span><span>{{ datas.modified_time }}</span></div>
+            <div><span class="title">补丁描述：</span><span>{{ datas.description }}</span></div>
+            <div id="patchCount"><span class="title">已下发：</span><span id="patchCountNumT"><a href="{% url 'monitor' app.id %}">{{ datas.issued }}</a></span></div>
+            <div>
+                <span class="title">下发状态：</span>
+                {% if datas.enable == True %}
+                    <span>{{ datas.enable }}<a href="#resumeModal" role="button" class="btn btn-primary btn-pause" data-toggle="modal">暂停下发</a></span>
+                {% else %}
+                    <span>{{ datas.enable }}<a href="#resumeModal" role="button" class="btn btn-primary btn-pause" data-toggle="modal">恢复下发</a></span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="patch-actions">
+            <a href="{% url 'add_patch' app.id datas.id %}" class="btn btn-large btn-primary btn-block patch-new-btn">发布新补丁</a>
+
+            <a href="#deleteModal" class="btn btn-large btn-danger btn-block patch-delete-btn" data-toggle="modal">删除此版本</a>
+            <div class="clear"></div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <div class="modal-title">确定删除此版本？</div>
+                </div>
+                <div class="modal-body">
+                    <p>此版本未下发补丁，删除对客户端无影响。</p>
+                </div>
+                <div class="modal-footer">
+                    <form method="POST" style="margin:0">
+                        <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">取消</button>
+                        <button class="btn btn-danger" type="submit" onclick="delpatch({{ datas.id }})">确定删除</button>
+                    </form>
+                </div>
+        </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="resumeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            {% if datas.enable == True %}
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <div class="modal-title">确定恢复补丁下发？</div>
+            </div>
+            <div class="modal-body">
+                <p>恢复下发后，下发规则仍与暂停前一样。</p>
+            </div>
+            <div class="modal-footer">
+                <form method="POST" style="margin:0">
+                    <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">取消</button>
+                    <button class="btn btn-danger" type="submit" onclick="updateissued({{ datas.id }})">暂停下发</button>
+                </form>
+            </div>
+            {% else %}
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <div class="modal-title">确定暂停补丁下发？</div>
+            </div>
+            <div class="modal-body">
+                <p>暂停后，补丁不再下发，未拉取过补丁的设备不会再拉取到补丁，已拉取过的设备仍继续执行补丁。</p>
+            </div>
+            <div class="modal-footer">
+                <form method="POST" style="margin:0">
+                    <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">取消</button>
+                    <button class="btn btn-danger" type="submit" onclick="updateissued({{ datas.id }})">恢复下发</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript">
+    $("#patch_issued").addClass("active");
+    $('[data-toggle="tooltip"]').tooltip();
+
+    var fillPadding = function() {
+        $('#fill').height($('#fill').height() + window.innerHeight - ($('.main').offset().top + $('.main').height() + $('.ft').height()))
+    };
+    $(window).resize(fillPadding);
+    fillPadding();
+    $('.ft').show();
+</script>
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)};
+        i[r].l=1*new Date();a=s.createElement(o);
+        m=s.getElementsByTagName(o)[0];
+        a.async=1;a.src=g;
+        m.parentNode.insertBefore(a,m)
+    })
+    (window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-1895639-14', 'auto');
+    ga('send', 'pageview');
+
+    //恢复、暂停下发
+    function updateissued(id) {
+        var issued={"id":id};
+        $.ajax({
+            async:false,
+            url:'/main/api/update_patch.do',
+            type:'POST',
+            data:issued,
+            success:function (msg) {
+                alert(msg.return_msg);
+                location.href = '{% url 'patch_details' app.id datas.id %}';
+            },
+            error:function (err) {
+                console.log(err);
+                location.href = '{% url 'patch_details' app.id datas.id %}';
+            }
+        });
+        return false;
+    }
+
+    //删除补丁
+    function delpatch(id) {
+        var deldata={"id":id};
+        $.ajax({
+            async:false,
+            url:'/main/api/delete_patch.do',
+            type:'POST',
+            data:deldata,
+            success:function (msg) {
+                if (msg.return_code == 'SUCCESS') {
+                    location.href = '/main';
+                }else {
+                    alert(msg.return_msg)
+                }
+            },
+            error:function (err) {
+                console.log(err);
+            }
+        });
+        return false;
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<head>
+    {% block title %}
+    <title>APP详情 - Tinker Platform - Android 热补丁平台</title>
+    {% endblock %}
+    <meta name="description" content="Tinker 平台提供 Android APP 热更新服务，APP 接入 Tinker 平台后，可以随时下发补丁包，实时更新APP">
+    <link rel="stylesheet" href="/static/main/css/bootstrap.min.css" />
+    <!-- <link rel="stylesheet" href="/Public/css/flat-ui.min.css" /> -->
+    <link rel="stylesheet" href="/static/main/css/main.css" />
+    <link rel="shortcut icon" href="/static/main/images/favicon.ico" type="image/x-icon" />
+    {% block style %}
+
+    {% endblock %}
+</head>
+
+<body>
+   
+    <div class="hd">
+        <div class="wrapper">
+            <a href="/main/" class="logo-tinker"></a>
+            <ul>
+                <li><a href="#" class="">我的帐号</a></li>
+                <li><a href="{% url 'index' %}" class="selected">我的App</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="wrapper">
+            <div class="app-nav">
+                <a href="#" class="app-link">
+                    <div class="app-icon">
+                        <img src="/static/main/images/app-icon.png">
+                        <span class="mask mask-gray"></span>
+                    </div>
+                    <spanid  class="app-title">{{ app.appname }}</spanid>
+                </a>
+
+                <div class="app-key-title"> <span>appKey</span> </div>
+                <div class="app-key alert alert-warning">
+                    <span class="key">{{ app.packname }}</span>
+                </div>
+                <ul class="app-side-menu">
+                    <li><a id="patch_issued" href="{% url 'patch_issued' app.id %}">补丁下发 <span class="arrow"></span></a></li>
+                    <li><a id="online_datas" href="{% url 'online_datas' app.id %}">在线参数 <span class="arrow"></span></a></li>
+                    <li><a id="monitor" href="{% url 'monitor' app.id %}" >实时监控 <span class="arrow"></span></a></li>
+                    <li><a id="histroy" href="{% url 'histroy' app.id %}" >历史补丁 <span class="arrow"></span></a></li>
+                    <li><a id="app_information" href="{% url 'app_information' app.id %}" >APP信息 <span class="arrow"></span></a></li>
+                </ul>
+            </div>
+            {% block content %}
+            {% endblock %}
+        </div>
+
+        <div class="clear"></div>
+        <div id="fill"></div>
+    </div>
+    <div class="ft">
+        <span class="copyright">AndroidUpdateManege     © 2017 </span>
+        <!-- <span class="links">
+              <a href="javascript:void(0);">Github开源</a> | <a href="javascript:void(0);">用户协议</a> |<a href="javascript:void(0);">联系我们</a>
+        </span> -->
+    </div>
+
+    <script src="/static/jquery/jquery-1.11.3.min.js"></script>
+    <script src="/static/main/js/bootstrap.min.js?v=1.2"></script>
+    {% block javascript %}
+
+    {% endblock %}
+</body>
+</html>

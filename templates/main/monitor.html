@@ -1,0 +1,184 @@
+{% extends 'main/base.html' %}
+
+{% block style %}
+    <style>
+        .app-stat-menu {
+            text-align: center;
+            padding:10px;
+        }
+        .app-stat-menu span {
+            padding: 0 5px;
+        }
+        .patch-select {
+            display: none;
+        }
+        #patchBtn {
+            font-size: 14px;
+            line-height: 14px;
+            padding: 7px 12px;
+            margin-left: 10px;
+        }
+        .app-stat-detail {
+            padding: 10px;
+            text-align: center;
+        }
+        .app-stat-detail p {
+            padding: 5px;
+            margin: 0;
+        }
+        .tips-empty {
+            display: none;
+            text-align: center;
+            padding:120px;
+        }
+        .tips-empty span {
+            display: block;
+            padding:5px;
+            font-size: 14px;
+            color:#888;
+         
+        }
+        #fail_count{
+            padding-top: 50px;
+            padding-left: 50px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="app-ctn">
+        <h1>实时监控</h1>
+        <div class="app-stat-menu" id="submit_form">
+            <span>
+                <span class="title">App版本:</span>
+                <select id="appSelect" onchange="get_patch_version(this)" name="app_version">
+                    <option value="" selected="selected" >APP版本</option>
+                    {% for obj in app.patch_set.all %}
+                    <option value="{{obj.app_version}}">{{obj.app_version}}</option>
+                    {% endfor %}
+                </select>
+            </span>
+            <span>
+                <span class="title">补丁版本:</span>
+                <select id="patchSelect" name="patch_version">
+                    <option value="" selected="selected">补丁版本</option>
+                   
+                </select>
+            </span>
+            <span>
+                <span class="title">补丁版本:</span>
+                <select id="typeSelect" name="data_type">
+                    <option value="day">最近一天</option>
+                    <option value="week" >最近七天</option>
+                </select>
+            </span>
+            <!-- <a href="javascript:void(0)" class="btn btn-info" id="patchBtn">查看</a> -->
+            <button class="btn btn-info" id="patchBtn" onclick="get_chart_data()">查看</button>
+            <div id="fail_count">
+                <p id="detailErr">失败数：<span id="errTotalCount"></span></p>
+            </div>
+        </div>
+            <div id="succStat" style="height: 250px;">
+                <!-- <div class="tips-empty">暂无数据</div> -->
+            <div id="chart" class="portlet-body widget-bg-color-icon card-box fadeInDown animated">
+                <div id="pic_chart" style="height: 450px;width: 870px;margin: 0 auto; position: relative; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></div>
+            </div>
+            </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+    <script src="/static/echarts/echarts.simple.min.js"></script>
+    <script type="text/javascript">
+         $("#monitor").addClass('active');
+            $('[data-toggle="tooltip"]').tooltip();
+            
+            var fillPadding = function() {
+                $('#fill').height($('#fill').height() + window.innerHeight - ($('.main').offset().top + $('.main').height() + $('.ft').height()))
+            };
+            $(window).resize(fillPadding);
+            fillPadding();
+            $('.ft').show();
+            function get_patch_version(self){
+                var app_version = $(self).val()
+                var app_packname = "{{app.packname}}"
+                $.ajax({
+                    type:'get',
+                    url:'/main/api/get_patch_version',
+                    data:{'app_version':app_version,'app_packname':app_packname,},
+                    dataType:'json',
+                    success:function(data){
+                        if(data.return_code == "SUCCESS"){
+                            $('.patch_version_option').remove();
+                            $(data.datas).each(function(index,item){
+                                var ele = '<option value="' + item[0] + '" class="patch_version_option">'+ item[0] +'</option>';
+                                $('#patchSelect').append(ele)
+                            })
+                       
+                        }
+                    }
+                })
+            }
+        var myChart=echarts.init(document.getElementById('pic_chart'));
+        function get_chart_data(){
+
+            var form  = document.getElementById("submit_form")
+            var select_list = form.getElementsByTagName("select")
+            var data_dict = {}
+            for(var i=0;i<select_list.length;i++){
+                data_dict[select_list[i].name] = select_list[i].value
+
+            }
+            data_dict['appid'] = "{{app.id}}"
+            $.ajax({
+                type:'post',
+                url:'api/get_chart_data',
+                data:data_dict,
+                dataType:'json',
+                success:function(data){
+                    if(data.return_code =='SUCCESS'){
+                        var data_list = data.datas;
+                        var data_name_list = [];
+                        var chart_data_list = [];
+                        var data_title_list = [];
+                        for(var i=0;i<data_list.length;i++){
+                            data_title_list.push(data_list[i][0])
+                            chart_data_list.push(data_list[i][1])
+                                    }
+                        option = {
+                            title: {
+                                text: '资源图表'
+                            },
+                            tooltip: {
+                                // trigger: 'axis'
+                            },
+
+                            xAxis: {
+                                data: data_title_list
+                            },
+                            yAxis: {
+                                // type: 'value',
+                                // boundaryGap: false,
+                                // data: [0, 200, 400, 600, 800, 1000]
+                            },
+                            series: [{  name:'成功数',
+                            type:'line',
+                            stack:'总数',
+                            data:chart_data_list,
+                            barGap:20,
+                        }]
+                        };
+                        document.getElementById('errTotalCount').textContent = data.fail
+                        myChart.setOption(option);
+                            
+                    }else{
+                            alert('数据生成失败')
+                        }
+                    }
+                    })
+            
+        }
+        get_chart_data()
+
+    </script>
+{% endblock %}

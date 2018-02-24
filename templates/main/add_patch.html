@@ -1,0 +1,303 @@
+{% extends "main/base.html" %}
+{% block style %}
+    <style>
+        .patch-ctn {
+            padding:30px 10px;
+            float: left;
+            width:650px;
+        }
+        .patch-ctn h1 {
+            font-size:35px;
+            text-align: center;
+            padding-bottom: 20px;
+
+        }
+        #patch-form {
+            width: 430px;
+            margin:0 auto;
+        }
+        .btn-patch-new, .btn-patch-del{
+            float:right;
+            font-size: 20px!important;
+            padding-top:5px!important;
+            padding-bottom: 5px!important;
+            width:40px;
+        }
+        .patch-rsa {
+          padding: 10px 0;
+        }
+
+
+        .patch-form-gray select{
+          width: 100px;
+        }
+        .patch-submit {
+          margin:20px 10px;
+        }
+
+        .patch-form-gray-count {
+            width: 180px!important;
+            height: 31px!important;
+            font-size: 14px!important;
+        }
+        .patch-form-condition {
+            margin: 10px 0;
+        }
+        .patch-form-condition input {
+          width:310px;
+        }
+        .patch-form-condition select {
+          height:42px;
+          float: right;
+        }
+
+        .patch-delete-btn-new {
+           width:130px;
+           margin:0 auto;
+        }
+
+        .patch-content-menu {
+          font-size: 14px;
+          padding-bottom:5px;
+        }
+        .patch-content-menu a {
+          color: #888;
+        }
+        .patch-content-menu a:hover {
+          color: #000;
+        }
+        .patch-content-menu a.selected{
+          color: #000;
+        }
+        .patch-content-menu span {
+          padding-right:10px;
+        }
+        .patch-content-menu span .tips {
+          float:right;
+          font-size: 13px;
+          color: #888;
+          display: none;
+        }
+
+
+        .textarea-ctn {
+            padding:10px;
+            width:100%;
+            margin:0 auto;
+            height:240px;
+        }
+
+        #patchTextPanel{
+          display: none;
+        }
+
+        #patchTextFooter {
+          font-size: 14px;
+          padding:5px 0;
+          line-height: 30px;
+        }
+        #patchTextSelectArea {
+          width: 300px;
+          display: inline;
+        }
+        .patch-text-covnertor {
+          display: block;
+          float: right;
+        }
+        #conditionSelect {
+          width: 110px;
+        }
+
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="patch-ctn">
+        <h1>发布补丁</h1>
+        <form id="patch-form" method="POST" action="" enctype="multipart/form-data">
+            <div class="form-group">
+                <div class="patch-info"><span>App版本号：{{ datas.app_version|default:"" }}</span></div>
+            </div>
+            <div class="form-group">
+                <div class="patch-content-menu"><span>补丁文件</span></div>
+                <div id="patchFilePanel">
+                    <input id="patchFile" type="file" style="display:none" name="patch">
+                    <div class="input-append">
+                        <input id="patchFileInput" name="patchFile" class="input-large" type="text" style="height: 41px;border-right: none;box-shadow: none;border-radius:6px 0 0 6px;width:335px" disabled="disabled" placeholder='请选择补丁文件'>
+                        <a class="btn btn-info" onclick="$('input[id=patchFile]').click();" style="margin-top: -3px; margin-left: -4px">选择文件</a>
+                    </div>
+                </div>
+
+            </div>
+            <div class="form-group">
+                <label>补丁版本</label>
+                <input type="text" class="form-control" id="patch_version" name="patch_version" placeholder="请输入补丁版本号"/>
+            </div>
+            <div class="form-group">
+                <label>补丁描述</label>
+                <input type="text" class="form-control" id="description" name="description" placeholder="补丁描述"/>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3">
+                    <label><input name="patch_type" type="radio" value="private" class="change-type"/> 开发预览 </label>
+                </div>
+                <div class="col-md-3">
+                    <label><input name="patch_type" type="radio" value="public" class="change-type"/> 全量下发 </label>
+                </div>
+                <div class="col-md-3">
+                    <label><input name="patch_type" type="radio" value="condition" class="change-type"/> 条件下发 </label>
+                </div>
+                <div class="col-md-3">
+                    <label><input name="patch_type" type="radio" value="gray" class="change-type"/> 灰度下发 </label>
+                </div>
+            </div>
+            <div class="row for-condition" style="display:none">
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" name="conditionValue" id="conditionInput" placeholder="条件">
+                </div>
+                <div class="col-sm-4">
+                    <select class="form-control conditionSelect" style="height:41px;">
+                        <option value="" selected="selected">预设条件</option>
+                        {% for i in pm_obj %}
+                        <option value="{{i.pname}}={{i.pvalues}}">{{i.pname}}={{i.pvalues}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row for-gray" style="display:none">
+                <div class="col-sm-4">
+                    <select name="grayType" class="form-control grayType" style="height:41px;">
+                        <option value="percentage" selected="selected">按百分比</option>
+                        <option value="userCount">按人数</option>
+                    </select>
+                </div>
+                <div class="col-sm-4 percentageType" style="display:block">
+                    <select name="percentageCount" class="form-control" style="height:41px;">
+                        <option value="0">百分之</option>
+                        <option value="1">10%</option>
+                        <option value="2">20%</option>
+                        <option value="3">30%</option>
+                        <option value="4">40%</option>
+                        <option value="5">50%</option>
+                        <option value="6">60%</option>
+                        <option value="7">70%</option>
+                        <option value="8">80%</option>
+                        <option value="9">90%</option>
+                    </select>
+                </div>
+                <div class="col-sm-4 percentageType" style="display:block">
+                    <select name="time_out" class="form-control" style="height:41px;">
+                        <option value="0">时限</option>
+                        <option value="1">一周</option>
+                        <option value="2">二周</option>
+                        <option value="3">三周</option>
+                        <option value="4">四周</option>
+                    </select>
+                </div>
+                <div class="col-sm-8">
+                    <input type="number" name="count" class="form-control userCountType" style="display:none" placeholder="人数"/>
+                </div>
+            </div>
+
+            <div class="form-group patch-submit">
+                <input name="id" type="hidden" value="{{ datas.id }}" />
+                <input name="app_version" type="hidden" value="{{ datas.app_version }}"/>
+                <button type="submit" class="btn btn-large btn-block btn-primary" id="submitBtn"> 提 交 </button>
+            </div>
+        </form>
+        <div class="patch-actions">
+            <a href="#deleteModal" class="btn btn-large btn-danger btn-block patch-delete-btn-new" data-toggle="modal">删除此版本</a>
+            <div class="clear"></div>
+        </div>
+    </div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <div class="modal-title">确定删除此版本？</div>
+        </div>
+        <div class="modal-body">
+            <p>此版本未下发补丁，删除对客户端无影响。</p>
+        </div>
+        <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">取消</button>
+                <button class="btn btn-danger"  onclick="delpatch({{datas.id}})">确定删除</button>
+        </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+    {% block javascript %}
+        <script type="text/javascript">
+            $("#patch_issued").addClass("active");
+            $('[data-toggle="tooltip"]').tooltip();
+
+            var fillPadding = function() {
+                $('#fill').height($('#fill').height() + window.innerHeight - ($('.main').offset().top + $('.main').height() + $('.ft').height()))
+            };
+            $(window).resize(fillPadding);
+            fillPadding();
+            $('.ft').show();
+
+
+            $('input[id=patchFile]').change(function() {
+                $('#patchFileInput').val($(this).val().replace('C:\\fakepath\\', ''));
+            });
+            $('.change-type').click(function(){
+                var value = $(this).val()
+                if(value=='condition'){
+                    $(".for-gray").attr('style','display:none')
+                    $(".for-condition").attr('style','display:block')
+                }else if(value=='gray'){
+                    $(".for-condition").attr('style','display:none')
+                    $(".for-gray").attr('style','display:block')
+                }else{
+                    $(".for-condition").attr('style','display:none')
+                    $(".for-gray").attr('style','display:none')
+                }
+            })
+            $(".grayType").change(function(){
+                var value = $(this).val()
+                if(value=='percentage'){
+                    $('.userCountType').attr('style','display:none')
+                    $('.percentageType').attr('style','display:block')
+                }else{
+                    $('.percentageType').attr('style','display:none')
+                    $('.userCountType').attr('style','display:block')
+                }   
+            })
+            $('.conditionSelect').change(function(){
+
+                var value = $("input[name=conditionValue]").val()
+                value += ($(this).val()+'&')
+                $("input[name=conditionValue]").val(value)
+            })
+            
+            //删除补丁
+            function delpatch(id) {
+                var deldata={"id":id};
+                $.ajax({
+                    async:false,
+                    url:'/main/api/delete_patch.do',
+                    type:'POST',
+                    data: deldata,
+                    success:function (msg) {
+                        if (msg.return_code == 'SUCCESS'){
+                            location.href = "{% url 'patch_issued' app.id %}";
+                        }else {
+                            alert(msg.return_msg)
+                        }
+                    },
+                    error:function (err) {
+                        console.log(err);
+                    }
+                });
+            }
+
+
+        </script>
+
+    {% endblock %}

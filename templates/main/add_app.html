@@ -1,0 +1,143 @@
+<html>
+<head>
+    <title>APP详情 - Tinker Platform - Android 热补丁平台</title>
+    <meta name="description" content="Tinker 平台提供 Android APP 热更新服务，APP 接入 Tinker 平台后，可以随时下发补丁包，实时更新APP">
+    <link rel="stylesheet" href="/static/main/css/bootstrap.min.css"/>
+    <!-- <link rel="stylesheet" href="/Public/css/flat-ui.min.css" /> -->
+    <link rel="stylesheet" href="/static/main/css/main.css"/>
+    <link rel="shortcut icon" href="/static/main/images/favicon.ico" type="image/x-icon"/>
+</head>
+
+<body>
+
+<div class="hd">
+    <div class="wrapper">
+        <a href="/" class="logo-tinker"></a>
+        <ul>
+            <li><a href="#" class="">我的帐号</a></li>
+            <li><a href="#" class=""> SDK下载 </a></li>
+            <li><a href="#" class=""> 文档 </a></li>
+            <li><a href="#" class="">账单</a></li>
+            <li><a href="#" class="">价格</a></li>
+            <li><a href="{% url 'index' %}" class="selected">我的App</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="main">
+    <style>
+        .dropdown-menu {
+            width: 400px !important;
+            overflow: hidden;
+        }
+
+        .app-new-ctn {
+            width: 400px;
+            margin: 0 auto;
+            padding-top: 20px;
+            padding-bottom: 70px;
+        }
+
+        .app-new-ctn h1 {
+            font-size: 35px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .app-new-appid {
+            width: 350px !important;
+            float: left;
+        }
+
+        .app-new-help {
+            margin-left: 10px;
+        }
+
+        .app-new-help-content {
+            clear: both;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .app-new-help-content span {
+            color: red;
+        }
+
+    </style>
+    <div class="wrapper">
+        <div class="app-new-ctn">
+            <h1>添加APP</h1>
+            <form method="POST">
+                <div class="form-group">
+                    <label> App名: </label>
+                    <input type="text" class="form-control" name="appname" placeholder="App名" data-provide="typeahead"
+                           id="appname">
+                </div>
+                <div class="form-group">
+                    <label> 包 名: </label>
+                    <input type="text" class="form-control" name="packname" placeholder="包名" data-provide="typeahead"
+                           id="packname">
+                </div>
+                <div class="form-group">
+                    <button id="addapp" type="submit" class="btn btn-large btn-block btn-primary"> 提 交</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="fill"></div>
+</div>
+
+<div class="ft">
+    <span class="copyright">TinkerPatch.com     © 2017 </span>
+    <span class="links">
+              <a href="javascript:void(0);">Github开源</a> | <a href="javascript:void(0);">用户协议</a> |<a
+            href="javascript:void(0);">联系我们</a></span>
+    </span>
+</div>
+
+<script src="/static/jquery/jquery-1.11.3.min.js"></script>
+<script src="/static/main/js/bootstrap.min.js?v=1.2"></script>
+<script type="text/javascript">
+
+    $('[data-toggle="tooltip"]').tooltip();
+
+    var fillPadding = function () {
+        $('#fill').height($('#fill').height() + window.innerHeight - ($('.main').offset().top + $('.main').height() + $('.ft').height()))
+    }
+    $(window).resize(fillPadding);
+    fillPadding();
+    $('.ft').show();
+    
+    //添加App
+    $("#addapp").click(function () {
+        var appname = $("#appname").val();
+        var packname = $("#packname").val();
+        var senddata = {"appname":appname, "packname":packname};
+        $.ajax({
+            async:false,
+            url:'/main/api/add_app.do',
+            type:'POST',
+            data:senddata,
+            success:function (msg) {
+                if (msg.return_code == 'SUCCESS'){
+                    alert("添加成功");
+                    console.log('in ajax');
+                    location.href = "/main";
+                }else {
+                    alert(msg.return_msg);
+                }
+
+            },
+            error:function (err) {
+                console.log(err);
+                alert("添加失败");
+                window.location.reload();
+            }
+        });
+        return false;
+    })
+</script>
+
+</body>
+</html>
